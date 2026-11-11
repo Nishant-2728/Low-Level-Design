@@ -1,115 +1,120 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-class WalkableRobot{
-public:
-    virtual void walk()=0;
-    virtual ~WalkableRobot(){}
-};
-
-class NormalWalk: public WalkableRobot{
-public:
-    void walk() override{
-        cout<<"Walking normally..."<<"\n";
-    }
-};
-
-class NoWalk: public WalkableRobot{
-public:
-    void walk() override{
-        cout<<"Cannot walk..."<<"\n";
-    }
-};
-
-class TalkableRobot{
+class Talkable{
 public:
     virtual void talk()=0;
-    virtual ~TalkableRobot(){}
 };
 
-class NormalTalk: public TalkableRobot{
+class NormalTalk: public Talkable{
 public:
     void talk() override{
-        cout<<"Talking normally..."<<"\n";
+        cout<<"The robot can talk normally..."<<"\n";
     }
 };
 
-class NoTalk: public TalkableRobot{
+class NoTalk: public Talkable{
 public:
     void talk() override{
-        cout<<"Cannot talk..."<<"\n";
+        cout<<"The robot cannot talk normally..."<<"\n";
     }
 };
 
-class FlyableRobot{
+class Walkable{
+public:
+    virtual void walk()=0;
+};
+
+class NormalWalk: public Walkable{
+public:
+    void walk() override{
+        cout<<"The robot can walk normally..."<<"\n";
+    }
+};
+
+class NoWalk: public Walkable{
+public:
+    void walk() override{
+        cout<<"The robot cannot walk normally..."<<"\n";
+    }
+};
+
+class Flyable{
 public:
     virtual void fly()=0;
-    virtual ~FlyableRobot(){}
 };
 
-class NormalFly: public FlyableRobot{
+class NormalFly: public Flyable{
 public:
     void fly() override{
-        cout<<"Flying normally..."<<"\n";
+        cout<<"The robot can fly normally..."<<"\n";
     }
 };
 
-class NoFly: public FlyableRobot{
+class NoFly: public Flyable{
 public:
     void fly() override{
-        cout<<"Cannot fly..."<<"\n";
+        cout<<"The robot cannot fly normally..."<<"\n";
     }
 };
 
 class Robot{
-protected:
-    WalkableRobot* walkbehaviour;
-    TalkableRobot* talkbehaviour;
-    FlyableRobot* flybehaviour;
+private:
+    Flyable* flyCharacter;
+    Talkable* talkCharacter;
+    Walkable* walkCharacter;
 public:
-    Robot(WalkableRobot*w, TalkableRobot* t,FlyableRobot* f){
-        this->walkbehaviour=w;
-        this->talkbehaviour=t;
-        this->flybehaviour=f;
+    void setRobotCharacters(Flyable* f,Talkable* t,Walkable* w){
+        this->flyCharacter=f;
+        this->talkCharacter=t;
+        this->walkCharacter=w;
     }
-    void walk(){
-        walkbehaviour->walk();
-    }
-    void talk(){
-        talkbehaviour->talk();
-    }
-    void fly(){
-        flybehaviour->fly();
-    }
-    virtual void projection()=0;
-};
-
-class CompanionRobot: public Robot{
-public:
-    CompanionRobot(WalkableRobot* w, TalkableRobot* t, FlyableRobot* f): Robot(w,t,f){}
-    void projection() override{
-        cout<<"Displaying friendly companion features..."<<"\n";
+    void exhibitBehaviour(){
+        flyCharacter->fly();
+        talkCharacter->talk();
+        walkCharacter->walk();
     }
 };
 
-class WorkerRobot: public Robot{
+class RobotFactory{
 public:
-    WorkerRobot(WalkableRobot* w, TalkableRobot* t, FlyableRobot* f): Robot(w,t,f){}
-    void projection() override{
-        cout<<"Displaying worker efficiency stats..."<<"\n";
+    static Talkable* createTalkBehaviour(string choice){
+        if(choice=="Normal"){
+            return new NormalTalk();
+        }
+        else{
+            return new NoTalk();
+        }
+    }
+    
+    static Walkable* createWalkBehaviour(string choice){
+        if(choice=="Normal"){
+            return new NormalWalk();
+        }
+        else{
+            return new NoWalk();
+        }
+    }
+    
+    static Flyable* createFlyBehaviour(string choice){
+        if(choice=="Normal"){
+            return new NormalFly();
+        }
+        else{
+            return new NoFly();
+        }
     }
 };
 
 int main(){
-	Robot* robot1= new CompanionRobot(new NormalWalk(), new NormalTalk(),new NoFly());
-	robot1->walk();
-	robot1->talk();
-	robot1->fly();
-	robot1->projection();
-	cout<<"------------------------------------------"<<"\n";
-	Robot* robot2= new WorkerRobot(new NoWalk(), new NoTalk(),new NormalFly());
-	robot2->walk();
-	robot2->talk();
-	robot2->fly();
-	robot2->projection();
+	string flychoice,talkchoice,walkchoice;
+	cin>>flychoice>>talkchoice>>walkchoice;
+	
+	Talkable* talkbehaviour=RobotFactory:: createTalkBehaviour(talkchoice);
+	Walkable* walkbehaviour=RobotFactory:: createWalkBehaviour(walkchoice);
+	Flyable* flybehaviour=RobotFactory:: createFlyBehaviour(flychoice);
+	
+	Robot* robot1= new Robot();
+	robot1->setRobotCharacters(flybehaviour,talkbehaviour,walkbehaviour);
+	robot1->exhibitBehaviour();
 }
