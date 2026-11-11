@@ -6,66 +6,81 @@ public:
     virtual void pay()=0;
 };
 
-class CreditCardPayment: public PaymentStrategy{
-public:
-    void pay() override{
-        cout<<"Processing payment using Credit Card...."<<"\n";
-    }
-};
-
 class GooglePayPayment: public PaymentStrategy{
 public:
     void pay() override{
-        cout<<"Processing payment using Google Pay...."<<"\n";
+        cout<<"Processing payment using Google Pay..."<<"\n";
     }
 };
 
 class PayPalPayment: public PaymentStrategy{
 public:
     void pay() override{
-        cout<<"Processing payment using PayPal...."<<"\n";
+        cout<<"Processing payment using PayPal..."<<"\n";
     }
 };
 
-class PaymentFactory{
+class CreditCardPayment: public PaymentStrategy{
 public:
-    PaymentStrategy* create(string choice){
-        if(choice=="Credit Card"){
-            return new CreditCardPayment();
-        }
-        else if(choice=="Google Pay"){
-            return new GooglePayPayment();
-        }
-        else if(choice=="PayPal"){
-            return new PayPalPayment();
-        }
+    void pay() override{
+        cout<<"Processing payment using Credit Card..."<<"\n";
+    }
+};
+
+class StripePayment: public PaymentStrategy{
+public:
+    void pay() override{
+        cout<<"Processing payment using Stripe..."<<"\n";
     }
 };
 
 class PaymentProcessor{
 private:
-    PaymentStrategy* paymethod;
+    PaymentStrategy* payMethod;
 public:
-    PaymentProcessor(PaymentStrategy* p):paymethod(p){
-        
+    void setPaymentStrategy(PaymentStrategy* strategy){
+        this->payMethod=strategy;
     }
-    void makePayment(){
-        paymethod->pay();
+    void processPayment(){
+        payMethod->pay();
     }
-    void setmethod(PaymentStrategy* p){
-        this->paymethod=p;
+};
+
+class PaymentFactory{
+public:
+    static PaymentStrategy* create(string choice){
+        PaymentStrategy* strategy;
+        if(choice=="Google Pay"){
+            strategy= new GooglePayPayment();
+        }
+        else if(choice=="PayPal"){
+            strategy= new PayPalPayment();
+        }
+        else if(choice=="Credit Card"){
+            strategy= new CreditCardPayment();
+        }
+        else{
+            strategy= new StripePayment();
+        }
+        return strategy;
     }
 };
 
 int main(){
-    PaymentFactory* factory=new PaymentFactory();
-    
 	string choice;
 	getline(cin,choice);
 	
-	PaymentStrategy* p=factory->create(choice);
+	PaymentStrategy* method1=PaymentFactory::create(choice);
 	
-	PaymentProcessor* processor=new PaymentProcessor(p);
+	PaymentProcessor* newProcessor= new PaymentProcessor();
+	newProcessor->setPaymentStrategy(method1);
+	newProcessor->processPayment();
 	
-	processor->makePayment();
+	getline(cin,choice);
+	
+	PaymentStrategy* method2=PaymentFactory::create(choice);
+	
+	newProcessor->setPaymentStrategy(method2);
+	newProcessor->processPayment();
+	
 }
